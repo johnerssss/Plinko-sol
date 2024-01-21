@@ -1,0 +1,70 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2759
+\cocoatextscaling0\cocoaplatform1{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11905\paperh16837\margl1133\margr1133\margb1133\margt1133
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs22 \cf2 \up0 \nosupersub \ulnone // Import necessary Solana libraries\
+use solana_program::\{\
+    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,\
+    program_error::ProgramError, sysvar::clock,\
+\};\
+\
+// Entrypoint function\
+entrypoint!(process_instruction);\
+\
+// Main function handling the Plinko game logic\
+fn process_instruction(\
+    program_id: &Pubkey,\
+    accounts: &[AccountInfo],\
+    instruction_data: &[u8],\
+) -> ProgramResult \{\
+    // Check if the program is called correctly\
+    msg!("Plinko game initiated!");\
+\
+    // Verify accounts\
+    let accounts_iter = &mut accounts.iter();\
+    let player_account = next_account_info(accounts_iter)?;\
+\
+    // Parse instruction data (e.g., for Plinko chip drop position)\
+    let position = instruction_data.get(0).cloned().ok_or(ProgramError::InvalidArgument)?;\
+\
+    // Validate the position\
+    if position < 0 || position >= PLINKO_BOARD_WIDTH \{\
+        return Err(ProgramError::InvalidArgument);\
+    \}\
+\
+    // Simulate Plinko chip drop\
+    let result_index = simulate_plinko_drop(position as usize);\
+\
+    // You can implement the rest of the game logic here, such as updating balances or other actions based on the result.\
+\
+    msg!("Plinko chip dropped at position \{\} and landed in slot \{\}", position, result_index);\
+\
+    Ok(())\
+\}\
+\
+// Helper function to simulate Plinko chip drop\
+fn simulate_plinko_drop(start_position: usize) -> usize \{\
+    // Simulate Plinko board with 7 slots\
+    const PLINKO_BOARD_WIDTH: usize = 7;\
+\
+    // Implement your Plinko board logic here. For simplicity, we'll use a random result.\
+    // In a real Plinko game, this would involve calculating the chip's path and final position based on the board's structure.\
+\
+    // For now, we'll just return a random slot index.\
+    let result_index = (start_position + rand::random::<usize>()) % PLINKO_BOARD_WIDTH;\
+\
+    result_index\
+\}\
+\
+// Helper function to get the next account info\
+fn next_account_info<'a, I>(iter: &mut I) -> Result<&'a AccountInfo<'a>, ProgramError>\
+where\
+    I: Iterator<Item = &'a AccountInfo<'a>>,\
+\{\
+    iter.next().ok_or(ProgramError::NotEnoughAccountKeys)\
+\}\
+}
